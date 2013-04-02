@@ -1,13 +1,18 @@
-name: InventoryAutomation
+name: Inventory Automation
 main: com.github.SpectraFusion.InventoryAutomation.InventoryAutomation
 version: 0.5.0
-description: "A variety of different functions for the inventory from automatic sorting of items to auto-replenishing of used items. ~More will be added in future releases~"
+description: A variety of different functions for the inventory from automatic sorting of items to auto-replenishing of used items. ~More will be added in future releases~
+author: SpectraFusion
 commands:
-    sort:
-        description: "A variety of functions for the inventory."
-        usage: |
-          "Usage: 
-          '/auto sort' : Sort your backpack inventory by material.
-          '/auto rep' : Display the current state of auto-replenishing.
-          '/auto rep e' : Enables auto-replenishing.
-          '/auto rep d' : Disables auto-replenishing."
+    auto sort:
+        description: Sorts your player inventory.
+        usage: /auto sort
+    auto rep:
+        description: Displays the current status of auto-replenishing.
+        usage: /auto rep
+    auto rep e:
+        description: Enables auto-replenishing.
+        usage: /auto rep e
+    auto rep d:
+        description: Disables auto-replenishing.
+        usage: /auto rep d
