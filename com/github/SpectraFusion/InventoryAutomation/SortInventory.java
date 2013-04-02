@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -41,10 +40,6 @@ public class SortInventory{
 			if (x != null){
 				ItemStack item = cmdExe.cloneItem(x);
 				
-				if (item.getType() == Material.IRON_SWORD){
-					sender.sendMessage("unsorted " + item.getDurability());
-				}
-				
 				// if it is the first item, just place it into the list
 				if (sortedItems.isEmpty()){
 					sortedItems.add(item);
@@ -53,6 +48,7 @@ public class SortInventory{
 				// if not, combine and sort the item
 				else{
 					boolean sorted = false;
+					int itemId = item.getData().getItemTypeId();
 					int maxStacks = item.getMaxStackSize();
 					int currDur = item.getDurability();
 					int firstIndex;
@@ -60,9 +56,10 @@ public class SortInventory{
 					
 					for (firstIndex = 0; firstIndex <= sortedItems.size() - 1; firstIndex++){
 						ItemStack sortedItem = sortedItems.get(firstIndex);
+						int sortedItemId = sortedItem.getData().getItemTypeId();
 						
 						// if the sortedItem is similar in material to the item
-						if (sortedItem.getData().getItemTypeId() == item.getData().getItemTypeId()){
+						if (sortedItemId == itemId){
 							int initIndex = firstIndex;
 							lastIndex = initIndex;
 							Iterator<ItemStack> sIit = sortedItems.listIterator(initIndex);
@@ -70,7 +67,8 @@ public class SortInventory{
 							// determine where the similar items start and end
 							while (sIit.hasNext()){
 								ItemStack sameItem = sIit.next();
-								if (sameItem.isSimilar(item)){
+								int sameItemId = sameItem.getData().getItemTypeId();
+								if (sameItemId == itemId){
 									lastIndex = sortedItems.lastIndexOf(sameItem);
 								}
 								else{
@@ -84,24 +82,18 @@ public class SortInventory{
 								int sortedStacks = sameItem.getAmount();
 								int sortedDur = sameItem.getDurability();
 								
-								// if item has durability
+								// if it is a tool(e.g. a sword)
 								if (!item.getType().isBlock() && item.getType().getMaxDurability() != 0){
-									
-									sender.sendMessage(item.toString() + " " + sameItem.toString());
-									sender.sendMessage("" + currDur + " " + sortedDur);
 									
 									// if the item durability is the same or greater than of sameItem, add it to the list at the first matching index
 									if (currDur <= sortedDur){
-										sender.sendMessage("less broken " + z);
 										sortedItems.add(z, item);
 										sorted = true;
 										break;
 									}
 									
 									// if the item durability is less than the durability of sameItem, add the item to the next index of sameItem
-									else if (currDur > sortedDur && (currDur <= sortedItems.get((z + 1)).getDurability())){
-										sender.sendMessage("" + (currDur <= sortedItems.get((z + 1)).getDurability()) + " " + z + " " + lastIndex);
-										sender.sendMessage("more broken " + (z + 1));
+									else if (currDur > sortedDur && (currDur <= sortedItems.get((z)).getDurability())){
 										sortedItems.add(z + 1, item);
 										sorted = true;
 										break;

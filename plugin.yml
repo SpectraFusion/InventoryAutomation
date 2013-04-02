@@ -1,9 +1,12 @@
 name: Inventory Automation
 main: com.github.SpectraFusion.InventoryAutomation.InventoryAutomation
-version: 0.5.0
+version: 0.6.0
 description: A variety of different functions for the inventory from automatic sorting of items to auto-replenishing of used items. ~More will be added in future releases~
 author: SpectraFusion
 commands:
+    auto:
+        description: Shows a list of all function statuses.
+        usage: /auto
     auto sort:
         description: Sorts your player inventory.
         usage: /auto sort

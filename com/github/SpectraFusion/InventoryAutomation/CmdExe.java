@@ -77,7 +77,15 @@ public class CmdExe implements CommandExecutor{
 			
 			// make sure the received command is 'auto'
 			if (cmd.getName().equalsIgnoreCase("auto")){
-				if (args.length != 0){
+				
+				// if it is just the command
+				// TODO change to more efficient method when there are more toggles
+				if (args.length == 0){
+					if (autoReplenishMode){
+						sender.sendMessage("Auto-replenish: " + ((autoReplenishMode) ? "Enabled" : "Disabled"));
+					}
+				}
+				else{
 					
 					// if first argument is 'sort', sort the player's inventory
 					if (args[0].equalsIgnoreCase("sort")){
