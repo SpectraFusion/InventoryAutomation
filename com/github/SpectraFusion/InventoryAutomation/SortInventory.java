@@ -3,8 +3,11 @@ package com.github.SpectraFusion.InventoryAutomation;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.bukkit.command.CommandSender;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -18,7 +21,7 @@ public class SortInventory{
 	}
 	
 	// sort inventory by material
-	// TODO fix durability items; is not adding to array properly
+	// TODO sort against enchantments as well
 	public void sortInventory(Player player, CommandSender sender){
 		Inventory inventory = player.getInventory();
 		ItemStack[] allItems = inventory.getContents();
@@ -39,6 +42,21 @@ public class SortInventory{
 		for (ItemStack x:items){
 			if (x != null){
 				ItemStack item = cmdExe.cloneItem(x);
+				
+				
+				
+				
+				// compare by sortedEnchantment.equals(itemEnchantment);
+				Map<Enchantment, Integer> enchantments = item.getEnchantments();
+				Iterator<Entry<Enchantment, Integer>> eit = enchantments.entrySet().iterator();
+				while (eit.hasNext()){
+					Map.Entry<Enchantment, Integer> ePairs = eit.next();
+					sender.sendMessage(item.getType().name() + " " + ePairs.getKey());
+				}
+				
+				
+				
+				
 				
 				// if it is the first item, just place it into the list
 				if (sortedItems.isEmpty()){
