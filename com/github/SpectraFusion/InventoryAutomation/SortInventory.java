@@ -1,8 +1,11 @@
 package com.github.SpectraFusion.InventoryAutomation;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -47,6 +50,7 @@ public class SortInventory{
 				// if not, combine and sort the item
 				else{
 					boolean sorted = false;
+					boolean moreEnchantments = false;
 					int itemId = item.getData().getItemTypeId();
 					int maxStacks = item.getMaxStackSize();
 					int currDur = item.getDurability();
@@ -58,47 +62,88 @@ public class SortInventory{
 						ItemStack sortedItem = sortedItems.get(firstIndex);
 						int sortedItemId = sortedItem.getData().getItemTypeId();
 						
-						// if the sortedItem is similar in material to the item
-						if (firstMatch == -1 && sortedItemId == itemId){
-							firstMatch = firstIndex;
-						}
-						
-						if (sortedItemId == itemId && cmdExe.checkEnchantments(item, sortedItem)){
+						if (sortedItemId == itemId){
+							/*
+							if (firstMatch == -1){
+								firstMatch = firstIndex;
+							}
+							*/
 							int initIndex = firstIndex;
-							lastIndex = initIndex;
-							Iterator<ItemStack> sIit = sortedItems.listIterator(initIndex);
+							//lastIndex = initIndex;
+							//Iterator<ItemStack> sIit = sortedItems.listIterator(initIndex);
+							Map<ItemStack, Integer> similarItems = new HashMap<ItemStack, Integer>();
 							
-							// determine where the similar items start and end
+							for (int index = firstIndex; index < sortedItems.size(); index++){
+								ItemStack similarItem = sortedItems.get(index);
+								if (similarItem != null){
+									int similarItemId = similarItem.getData().getItemTypeId();
+									if (similarItemId == itemId){
+										similarItems.put(similarItem, index);
+										if (moreEnchantments == false){
+											moreEnchantments = item.getEnchantments().size() >= similarItem.getEnchantments().size();
+											if (moreEnchantments && firstMatch == -1){
+												firstMatch = index;
+											}
+										}
+									}
+								}
+							}
+							
+							sender.sendMessage("" + similarItems);
+							sender.sendMessage(" ");
+							
+							Map<ItemStack, Integer> sameItems = new HashMap<ItemStack, Integer>();
+							Iterator<ItemStack> siIit = similarItems.keySet().iterator();
+							
+							while (siIit.hasNext()){
+								ItemStack sameItem = siIit.next();
+								if (cmdExe.checkEnchantments(item, sameItem)){
+									sameItems.put(sameItem, similarItems.get(sameItem));
+								}
+							}
+							
+							
+							/*
+							// get a list of all similar items and their indexes
 							while (sIit.hasNext()){
 								ItemStack sameItem = sIit.next();
 								int sameItemId = sameItem.getData().getItemTypeId();
-								if (sameItemId == itemId && cmdExe.checkEnchantments(item, sameItem)){
-									lastIndex = sortedItems.lastIndexOf(sameItem);
+								if (sameItemId == itemId){
+									sameItems.put(sameItem, )
 								}
 								else{
 									break;
 								}
 							}
+							*/
 							
-							for (int z = initIndex; z <= lastIndex; z++){
+							
+							
+							Iterator<ItemStack> sIit = sameItems.keySet().iterator();
+							
+							//for (int z = initIndex; z <= lastIndex; z++){
+							while (sIit.hasNext()){
 								int currStacks = item.getAmount();
-								ItemStack sameItem = sortedItems.get(z);
+								ItemStack sameItem = sIit.next();
 								int sortedStacks = sameItem.getAmount();
 								int sortedDur = sameItem.getDurability();
+								int index = sameItems.get(sameItem);
 								
 								// if it is a tool(e.g. a sword)
 								if (!item.getType().isBlock() && item.getType().getMaxDurability() != 0){
 									
 									// if the item durability is the same or greater than of sameItem, add it to the list at the first matching index
 									if (currDur <= sortedDur){
-										sortedItems.add(z, item);
+										sender.sendMessage("1");
+										sortedItems.add(index, item);
 										sorted = true;
 										break;
 									}
 									
 									// if the item durability is less than the durability of sameItem, add the item to the next index of sameItem
-									else if (currDur > sortedDur && (currDur <= sortedItems.get((z)).getDurability())){
-										sortedItems.add(z + 1, item);
+									else if (currDur > sortedDur && index < (sameItems.size() - 1) && (currDur <= sortedItems.get(index + 1).getDurability())){
+										sender.sendMessage("2");
+										sortedItems.add(index + 1, item);
 										sorted = true;
 										break;
 									}
@@ -107,6 +152,7 @@ public class SortInventory{
 								else{
 									// if item is at the max number of stacks, just add to the list at the first matching index
 									if (currStacks == maxStacks){
+										sender.sendMessage("3");
 										sortedItems.add(initIndex, item);
 										sorted = true;
 										break;
@@ -120,12 +166,14 @@ public class SortInventory{
 										
 										// if they make a full stack with a remainder, set the sortedItem stack size to the maxStack and the item to the remaining stacks
 										if (totalStacks > maxStacks){
+											sender.sendMessage("5");
 											sameItem.setAmount(maxStacks);
 											item.setAmount(totalStacks - maxStacks);
 										}
 										
 										// if the total stacks is less or equal to maxStacks, just set the sortedItem stack size to the totalStacks
 										else if (totalStacks <= maxStacks){
+											sender.sendMessage("6");
 											sameItem.setAmount(totalStacks);
 											sorted = true;
 											break;
@@ -137,22 +185,22 @@ public class SortInventory{
 							// break the loop since the first match was only needed
 							break;
 						}
-						/*
-						else if (sortedItemId != itemId && (firstIndex != 0 && sortedItems.get(firstIndex - 1).getData().getItemTypeId() == itemId)){
-							sortedItems.add(firstMatch, item);
-							sorted = true;
-							break;
-						}
-						*/
 					}
 					
 					// if the item was not sorted and there are no other matching items in the inventory, add the item to the next empty slot in the inventory
 					if (sorted == false && lastIndex == -1){
-						sortedItems.add(firstIndex, item);
+						sender.sendMessage("7");
+						if (moreEnchantments && firstMatch != -1){
+							sortedItems.add(firstMatch, item);
+						}
+						else{
+							sortedItems.add(firstIndex, item);
+						}
 					}
 					
 					// if the item was not sorted but there were matching items, add it the the end of the matching items
 					else if (sorted == false && lastIndex != -1){
+						sender.sendMessage("8");
 						sortedItems.add(lastIndex + 1, item);
 					}
 				}
