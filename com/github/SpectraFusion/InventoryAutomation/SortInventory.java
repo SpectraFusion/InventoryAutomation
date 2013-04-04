@@ -3,11 +3,7 @@ package com.github.SpectraFusion.InventoryAutomation;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.bukkit.command.CommandSender;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -42,22 +38,7 @@ public class SortInventory{
 		for (ItemStack x:items){
 			if (x != null){
 				ItemStack item = cmdExe.cloneItem(x);
-				
-				
-				
-				
-				// compare by sortedEnchantment.equals(itemEnchantment);
-				Map<Enchantment, Integer> enchantments = item.getEnchantments();
-				Iterator<Entry<Enchantment, Integer>> eit = enchantments.entrySet().iterator();
-				while (eit.hasNext()){
-					Map.Entry<Enchantment, Integer> ePairs = eit.next();
-					sender.sendMessage(item.getType().name() + " " + ePairs.getKey());
-				}
-				
-				
-				
-				
-				
+
 				// if it is the first item, just place it into the list
 				if (sortedItems.isEmpty()){
 					sortedItems.add(item);
@@ -69,6 +50,7 @@ public class SortInventory{
 					int itemId = item.getData().getItemTypeId();
 					int maxStacks = item.getMaxStackSize();
 					int currDur = item.getDurability();
+					int firstMatch = -1;
 					int firstIndex;
 					int lastIndex = -1;
 					
@@ -77,7 +59,11 @@ public class SortInventory{
 						int sortedItemId = sortedItem.getData().getItemTypeId();
 						
 						// if the sortedItem is similar in material to the item
-						if (sortedItemId == itemId){
+						if (firstMatch == -1 && sortedItemId == itemId){
+							firstMatch = firstIndex;
+						}
+						
+						if (sortedItemId == itemId && cmdExe.checkEnchantments(item, sortedItem)){
 							int initIndex = firstIndex;
 							lastIndex = initIndex;
 							Iterator<ItemStack> sIit = sortedItems.listIterator(initIndex);
@@ -86,7 +72,7 @@ public class SortInventory{
 							while (sIit.hasNext()){
 								ItemStack sameItem = sIit.next();
 								int sameItemId = sameItem.getData().getItemTypeId();
-								if (sameItemId == itemId){
+								if (sameItemId == itemId && cmdExe.checkEnchantments(item, sameItem)){
 									lastIndex = sortedItems.lastIndexOf(sameItem);
 								}
 								else{
@@ -151,6 +137,13 @@ public class SortInventory{
 							// break the loop since the first match was only needed
 							break;
 						}
+						/*
+						else if (sortedItemId != itemId && (firstIndex != 0 && sortedItems.get(firstIndex - 1).getData().getItemTypeId() == itemId)){
+							sortedItems.add(firstMatch, item);
+							sorted = true;
+							break;
+						}
+						*/
 					}
 					
 					// if the item was not sorted and there are no other matching items in the inventory, add the item to the next empty slot in the inventory

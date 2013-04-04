@@ -1,5 +1,7 @@
 package com.github.SpectraFusion.InventoryAutomation;
 
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.bukkit.command.*;
@@ -32,6 +34,35 @@ public class CmdExe implements CommandExecutor{
         return clonedItem;
 	}
 	
+	// check to see if one item has the same enchantments as another item
+	public boolean checkEnchantments(ItemStack item, ItemStack sortedItem){
+		boolean sameEnchantments = true;
+		Map<Enchantment, Integer> itemEnchantments = item.getEnchantments();
+		Map<Enchantment, Integer> sortedItemEnchantments = sortedItem.getEnchantments();
+		if (itemEnchantments.size() == sortedItemEnchantments.size()){
+			Iterator<Entry<Enchantment, Integer>> sIEit = sortedItemEnchantments.entrySet().iterator();
+			while (sIEit.hasNext()){
+				Map.Entry<Enchantment, Integer> enchantmentPair = sIEit.next();
+				Enchantment enchantment = enchantmentPair.getKey();
+				int enchantmentLvl = enchantmentPair.getValue();
+				if (itemEnchantments.containsKey(enchantment)){
+					if (itemEnchantments.get(enchantment) != enchantmentLvl){
+						sameEnchantments = false;
+						break;
+					}
+				}
+				else{
+					sameEnchantments = false;
+					break;
+				}
+			}
+		}
+		else{
+			sameEnchantments = false;
+		}
+		return sameEnchantments;
+	}
+
 	// find the first same ItemStack in the inventory that is not the itemInHand ItemStack; return null if there is no match
 	public ItemStack getFirstSimilarItem(ItemStack itemInHand, ItemStack[] inventory){
 		ItemStack sameItem = null;
